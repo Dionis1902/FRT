@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  bot:
+    build: .
+    image: frt-bot
+    container_name: frt-bot
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./data/bot:/files/data
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    restart: always
+    healthcheck:
+      test: echo 'db.runCommand({serverStatus:1}).ok' | mongo admin -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --quiet | grep 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    volumes:
+      - ./data/mongodb:/files/data/db
