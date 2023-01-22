@@ -1,0 +1,80 @@
+<div>
+    <div id="dynamic-inputs-{{ data['name'] }}"></div>
+</div>
+<script>
+    // name, pattern, placeholder
+
+    $(document).on('keyup change', '[name={{ data['name'] }}]', function () {
+        let inputs = $('#dynamic-inputs-{{ data['name'] }} input[type=text]')
+        if ($(this).val().trim().length === 0 && $(this).data('input-number') !== inputs.last().data('input-number')) {
+            $(this).remove()
+        } else if ($(this).val().length > 0 && $(this).data('input-number') === inputs.last().data('input-number')) {
+            createInputField_{{ data['name']|safe }}()
+        }
+    })
+
+    $(document).on('change', '[name={{ data['name'] }}]', function () {
+        if ($(this)[0].validity.valid)
+            $(this).removeClass('is-invalid').addClass('is-valid')
+        else
+            $(this).removeClass('is-valid').addClass('is-invalid')
+    })
+
+    function createInputField_{{ data['name']|safe }}() {
+        let e = $('#dynamic-inputs-{{ data['name'] }} input[type=text]').last()
+        let inputField = $('<input>', {
+            class: 'form-control mb-3',
+            type: 'text',
+            name: '{{ data['name'] }}',
+            pattern: '{{ data['pattern']|safe }}',
+            placeholder: '{{ data['placeholder'] }}',
+            'data-input-number': e.length ? parseInt(e.data('input-number')) + 1 : 0
+        });
+        $('#dynamic-inputs-{{ data['name'] }}').append(inputField);
+    }
+
+    $(document).on('keydown', '[name={{ data['name'] }}]', function (e) {
+        if (e.which === 13) {
+            $('#dynamic-inputs-{{ data['name'] }} input[type=text]').last().focus();
+        }
+    });
+
+    $(document).on('paste', '[name={{ data['name'] }}]:focus', function (e) {
+        let pastedText = e.originalEvent.clipboardData.getData('text')
+        let lines = pastedText.split('\n')
+        let id = parseInt($(this).data('input-number'))
+        if (lines.length !== 1){
+            for (let i = id; i < id + lines.length; i++) {
+                $('[data-input-number=' + i + '][name={{ data['name'] }}]').val(lines[i - id]).trigger('change')
+                if ($('#dynamic-inputs-{{ data['name'] }} input[type=text]').last().val().length)
+                    createInputField_{{ data['name']|safe }}();
+            }
+            $('[data-input-number=' + (id + lines.length) + '][name={{ data['name'] }}]').focus()
+        }
+        return lines.length === 1
+    })
+
+    data.push({
+        name: '{{ data['name'] }}', func: () => {
+            let inputs = $('#dynamic-inputs-{{ data['name'] }} input[type=text]').slice(0, -1)
+            if(!inputs.length){
+                alert({message: 'You have not entered any data', type: 'danger'})
+                return
+            }
+            let result = []
+
+            for(let e of inputs){
+                if(!e.validity.valid){
+                    alert({message: 'Invalid input data format', type: 'danger'})
+                    return
+                }
+                result.push($(e).val())
+            }
+            return [...new Set(result)]
+
+        }
+    })
+
+
+    createInputField_{{ data['name']|safe }}()
+</script>

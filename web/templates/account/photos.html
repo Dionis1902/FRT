@@ -1,0 +1,60 @@
+<form id="updateAvatar" method="POST" action="/api/accounts/photo/" target="dummyFrame" enctype="multipart/form-data" class="mb-3">
+    <label for="file" class="form-label">Profile Photo (<a href="https://thispersondoesnotexist.com/">Random photo</a>)</label>
+    <div>
+        <input type="file" class="form-control" name="file" id="photo" accept="image/png, image/jpeg" required>
+        <input type="hidden" name="user_id" id="user_id" value="{{ account.user_id }}" required>
+    </div>
+</form>
+<div id="carouselExampleCaptions" class="carousel carousel-dark slide" data-bs-ride="false">
+    {% if account.photos|length > 1 %}
+        <div class="carousel-indicators">
+            {% for image_id in account.photos %}
+                <button type="button {{ image_id }}" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="{{ loop.index0 }}"
+                        {{ 'class="active"'|safe if loop.index0 == 0 else '' }} {{ 'aria-current="true"'|safe if loop.index0 == 0 else '' }}></button>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="carousel-inner">
+        {% for image_id in account.photos %}
+            <div class="carousel-item {{ 'active' if loop.index0 == 0 else '' }} {{ image_id }}" id="{{ image_id }}">
+                <img src="/api/accounts/photo/{{ image_id }}" class="rounded-circle d-block w-100" alt="...">
+            </div>
+        {% endfor %}
+    </div>
+    {% if account.photos|length > 1 %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    {% endif %}
+</div>
+{% if account.photos|length %}
+    <button type="button" class="btn btn-danger w-100 mt-3" id="deletePhoto" onclick="deletePhoto()">
+        <i class="bi-trash3"></i> Delete
+    </button>
+{% endif %}
+<script>
+    let photoElement = $('#photo')
+
+    function lockPhotoButtons(lock) {
+        photoElement.attr('disabled', lock).attr('readonly', lock)
+        $('#deletePhoto')[lock ? 'addClass' : 'removeClass']('disabled')
+    }
+
+    function deletePhoto() {
+        let photoId = $('.carousel-inner .active').attr('id')
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/accounts/photo/' + photoId + '?tab_id=' + tabID + '&user_id=' + {{ account.user_id }},
+            type: 'DELETE'
+        })
+    }
+
+    photoElement.change(function () {
+        $('#updateAvatar').submit()
+    })
+
+</script>

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+    <table class="table text-center">
+        <thead>
+        <tr>
+            <th scope="col" style="width: 10%">ID</th>
+            <th scope="col" style="width: 30%">Name</th>
+            <th scope="col" style="width: 25%">Start time</th>
+            <th scope="col" style="width: 25%">Status</th>
+            <th scope="col" style="width: 10%">Action</th>
+        </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+    <script>
+        let options = {
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        };
+
+        let elements = {
+            progress: {text: 'In progress', type: 'primary'},
+            error: {text: 'Error', type: 'danger'},
+            stopped: {text: 'Stopped', type: 'warning'},
+            killed: {text: 'Killed', type: 'danger'},
+            finished: {text: 'Finished', type: 'success'}
+        }
+
+        function insertElement({id, name, start_time, status}) {
+            let date = new Date(start_time + 'Z');
+            let formattedDate = date.toLocaleString('en-US', options);
+            const $tr = $(`
+    <tr>
+      <td>${id}</td>
+      <td>${name}</td>
+      <td>${formattedDate}</td>
+      <td class="text-${elements[status]['type']}">${elements[status]['text']}</td>
+      <td><a href="/tasks/${id}"><i class="bi bi-pencil-square text-success"></i></a></td>
+    </tr>
+  `);
+            $('#tableBody').append($tr)
+        }
+
+        $(document).ready(function () {
+            $.ajax({
+                url: "/api/tasks",
+                type: 'GET',
+                dataType: 'json',
+                success: function (tasks) {
+                    for (let task of tasks)
+                        insertElement(task)
+                }
+            });
+        })
+
+    </script>
+{% endblock %}

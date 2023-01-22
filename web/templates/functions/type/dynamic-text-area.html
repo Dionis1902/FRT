@@ -1,0 +1,43 @@
+<div>
+    <div id="dynamic-text-area-{{ data['name'] }}"></div>
+</div>
+<script>
+    // name, placeholder
+
+    $(document).on('keyup change', '[name={{ data['name'] }}]', function () {
+        let inputs = $('#dynamic-text-area-{{ data['name'] }} textarea');
+        if ($(this).val().trim().length === 0 && $(this).data('input-number') !== inputs.last().data('input-number')) {
+            $(this).remove()
+        } else if ($(this).val().length > 0 && $(this).data('input-number') === inputs.last().data('input-number')) {
+            createInputField_{{ data['name']|safe }}()
+        }
+    })
+
+    function createInputField_{{ data['name']|safe }}() {
+        let e = $('#dynamic-text-area-{{ data['name'] }} textarea').last()
+        let inputField = $('<textarea></textarea>', {
+            class: 'form-control mb-3',
+            rows: 3,
+            name: '{{ data['name'] }}',
+            placeholder: '{{ data['placeholder'] }}',
+            'data-input-number': e.length ? parseInt(e.data('input-number')) + 1 : 0
+        });
+         $('#dynamic-text-area-{{ data['name'] }}').append(inputField);
+    }
+    createInputField_{{ data['name']|safe }}()
+
+    data.push({
+        name: '{{ data['name'] }}', func: () => {
+            let inputs = $('#dynamic-text-area-{{ data['name'] }} textarea').slice(0, -1)
+            if(!inputs.length){
+                alert({message: 'You have not entered any data', type: 'danger'})
+                return
+            }
+            let result = []
+
+            for(let e of inputs)
+                result.push($(e).val())
+            return [...new Set(result)]
+        }
+    })
+</script>

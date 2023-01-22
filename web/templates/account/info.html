@@ -1,0 +1,121 @@
+<form id="updateAccountInfo" method="post" action="/api/accounts/{{ account.user_id }}" target="dummyFrame" class="mb-3">
+    <div class="mb-3 row">
+        <div class="col">
+            <label for="first_name" class="form-label">First name</label>
+            <input type="text" class="form-control" name="first_name" placeholder="Donald" id="first_name" value="{{ account.first_name }}" minlength="1" maxlength="64" required>
+        </div>
+        <div class="col">
+            <label for="last_name" class="form-label">Last name</label>
+            <input type="text" class="form-control" name="last_name" placeholder="Duck" id="last_name" value="{{ account.last_name or '' }}" maxlength="64">
+        </div>
+        <div class="col">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" placeholder="donald_duck" id="username" value="{{ account.username or '' }}" pattern="^[\w_]{5,32}$">
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="bio" class="form-label">About</label>
+        <textarea placeholder="Hello world!" class="form-control" id="bio" name="bio" style="resize: none" maxlength="70">{{ account.bio or '' }}</textarea>
+    </div>
+    <label for="proxy" class="form-label">Proxy (If empty, global proxy will be used if it is specified)</label>
+    <input type="text" class="form-control mb-3" name="proxy" id="proxy" value="{{ account.proxy or '' }}"  placeholder="socks5://username:password@hostname.com:80" pattern="^(?:(?:(socks[45])://)(?:[a-zA-Z0-9._%+-]+(?::[a-zA-Z0-9._%+-]+)?@)?)((?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::(\d+))?$">
+    <fieldset disabled readonly>
+        <div class="mb-3 row">
+
+            <div class="col-3">
+                <label for="user_id" class="form-label">ID</label>
+                <input type="text" class="form-control disabled" id="user_id" value="{{ account.user_id }}">
+            </div>
+            <div class="col-3">
+                <label for="phone_number" class="form-label">Phone number</label>
+                <input type="text" class="form-control" id="phone_number" value="+{{ account.phone_number }}">
+            </div>
+            <div class="col-2">
+                <label for="is_premium" class="form-label">Premium</label>
+                <input type="text" class="form-control" id="is_premium" value="{{ account.is_premium }}">
+            </div>
+            <div class="col-4">
+                <label for="is_premium" class="form-label">Spam block</label>
+                <input type="text" class="form-control" id="is_premium" value="{{ account.spam_block }}">
+            </div>
+        </div>
+    </fieldset>
+    <div class="d-flex justify-content-between" id="buttons">
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi-file-earmark-code"></i> Actions</button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" style="cursor: pointer" onclick="getTdata()"><i class="bi-file-earmark-arrow-down"></i> Export Tdata</a></li>
+                <li><a class="dropdown-item" style="cursor: pointer" onclick="copyString()"><i class="bi-clipboard2-check"></i> Copy session string</a></li>
+                <li><a class="dropdown-item" style="cursor: pointer" onclick="updateAccount()"><i class="bi-clipboard2-pulse"></i> Validate account</a></li>
+                <li><a class="dropdown-item" style="cursor: pointer" onclick="getCode()"><i class="bi-upc-scan"></i> Get login code</a></li>
+                <li><a class="dropdown-item" style="cursor: pointer" onclick="getDefaultPassword()"><i class="bi-lock"></i> Get default password</a></li>
+              </ul>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary me-2" onclick="getRandom()"><i class="bi-dice-5"></i> Random data</button>
+            <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Save</button>
+        </div>
+    </div>
+</form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/sha256.js"></script>
+<script>
+    function lockInfoButtons(lock) {
+        $('#buttons button')[lock ? 'addClass' : 'removeClass']('disabled')
+    }
+
+    function copyString() {
+        navigator.clipboard.writeText("{{ account.session_string }}")
+        alert({message: 'Copied to clipboard'})
+    }
+
+    function updateAccount() {
+        $.ajax({
+            url: '/api/accounts/{{ account.user_id }}/validate?tab_id=' + tabID,
+            type: 'GET'
+        })
+    }
+
+    function getCode() {
+        $.ajax({
+            url: '/api/accounts/{{ account.user_id }}/code?tab_id=' + tabID,
+            type: 'GET',
+            success: function (data) {
+                if (data['success'])
+                    navigator.clipboard.writeText(data['code'])
+            }
+        })
+    }
+
+    function getDefaultPassword() {
+        navigator.clipboard.writeText(CryptoJS.SHA256("{{ account.phone_number + settings.get('hash_password', '') }}").toString().substring(0, 6))
+        alert({message: 'Default password copied to clipboard'})
+    }
+
+    function updateAccountData(data) {
+        for (let key of Object.keys(data))
+            $('#' + key).val(data[key])
+    }
+
+    function getRandom(){
+       $.ajax({
+            url: '/api/accounts/random/',
+            type: 'GET',
+            success: function (data) {
+                updateAccountData(data)
+            }
+        })
+    }
+
+    function getTdata(){
+        let element = document.createElement('a');
+        element.setAttribute('href', '/api/accounts/{{ account.user_id }}/tdata')
+        element.style.display = 'none'
+        element.download = 'Account {{ account.user_id }} Tdata.zip'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+    }
+
+</script>

@@ -30,3 +30,6 @@ data
 docker-compose.yml
 Dockerfile
 test*.py
+postgres_data
+images
+README.md

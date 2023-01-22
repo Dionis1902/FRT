@@ -1,25 +1,31 @@
 version: "3.9"
 services:
-  bot:
-    build: .
-    image: frt-bot
-    container_name: frt-bot
+  botnet:
+    container_name: frt
+    image: dionis1902/frt:latest
     restart: always
-    env_file:
-      - .env
     volumes:
-      - ./data/bot:/files/data
+      - ./data:/data
+    ports:
+      - '8080:8080'
     depends_on:
-      - mongo
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_URL: postgresql://root:secret_password@postgres/data
 
-  mongo:
-    image: mongo
+  postgres:
+    container_name: postgres_container
+    image: postgres:latest
     restart: always
-    healthcheck:
-      test: echo 'db.runCommand({serverStatus:1}).ok' | mongo admin -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --quiet | grep 1
-      interval: 10s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
     volumes:
-      - ./data/mongodb:/files/data/db
+      - ./data/postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: data
+      POSTGRES_PASSWORD: secret_password
+      POSTGRES_USER: root
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

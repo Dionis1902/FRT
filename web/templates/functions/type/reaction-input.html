@@ -1,0 +1,105 @@
+<div>
+    <div id="reactions-{{ data['name'] }}" class="text-center">
+        <input type="checkbox" class="btn-check" id="reaction-all" name="{{ data['name'] }}" value="all" autocomplete="off">
+        <label class="btn btn-outline-primary mb-3 me-3" for="reaction-all">All</label>
+    </div>
+</div>
+<script>
+    let reaction = {
+        '👍': 'https://emojigraph.org/media/apple/thumbs-up_1f44d.png',
+        '😴': 'https://emojigraph.org/media/apple/sleeping-face_1f634.png',
+        '😁': 'https://emojigraph.org/media/apple/beaming-face-with-smiling-eyes_1f601.png',
+        '🤯': 'https://emojigraph.org/media/apple/exploding-head_1f92f.png',
+        '🥱': 'https://emojigraph.org/media/apple/yawning-face_1f971.png',
+        '👻': 'https://emojigraph.org/media/apple/ghost_1f47b.png',
+        '🤮': 'https://emojigraph.org/media/apple/face-vomiting_1f92e.png',
+        '🥰': 'https://emojigraph.org/media/apple/smiling-face-with-hearts_1f970.png',
+        '🍌': 'https://emojigraph.org/media/apple/banana_1f34c.png',
+        '🌭': 'https://emojigraph.org/media/apple/hot-dog_1f32d.png',
+        '👏': 'https://emojigraph.org/media/apple/clapping-hands_1f44f.png',
+        '🙏': 'https://emojigraph.org/media/apple/folded-hands_1f64f.png',
+        '💋': 'https://emojigraph.org/media/apple/kiss-mark_1f48b.png',
+        '🤬': 'https://emojigraph.org/media/apple/face-with-symbols-on-mouth_1f92c.png',
+        '🎃': 'https://emojigraph.org/media/apple/jack-o-lantern_1f383.png',
+        '🤔': 'https://emojigraph.org/media/apple/thinking-face_1f914.png',
+        '🎉': 'https://emojigraph.org/media/apple/party-popper_1f389.png',
+        '🍓': 'https://emojigraph.org/media/apple/strawberry_1f353.png',
+        '🤓': 'https://emojigraph.org/media/apple/nerd-face_1f913.png',
+        '🤝': 'https://emojigraph.org/media/apple/handshake_1f91d.png',
+        '🔥': 'https://emojigraph.org/media/apple/fire_1f525.png',
+        '🥴': 'https://emojigraph.org/media/apple/woozy-face_1f974.png',
+        '😭': 'https://emojigraph.org/media/apple/loudly-crying-face_1f62d.png',
+        '🤣': 'https://emojigraph.org/media/apple/rolling-on-the-floor-laughing_1f923.png',
+        '🤡': 'https://emojigraph.org/media/apple/clown-face_1f921.png',
+        '😍': 'https://emojigraph.org/media/apple/smiling-face-with-heart-eyes_1f60d.png',
+        '😱': 'https://emojigraph.org/media/apple/face-screaming-in-fear_1f631.png',
+        '🖕': 'https://emojigraph.org/media/apple/middle-finger_1f595.png',
+        '✍': 'https://emojigraph.org/media/apple/writing-hand_270d-fe0f.png',
+        '😇': 'https://emojigraph.org/media/apple/smiling-face-with-halo_1f607.png',
+        '💯': 'https://emojigraph.org/media/apple/hundred-points_1f4af.png',
+        '😐': 'https://emojigraph.org/media/apple/neutral-face_1f610.png',
+        '😨': 'https://emojigraph.org/media/apple/fearful-face_1f628.png',
+        '🫡': 'https://emojigraph.org/media/apple/saluting-face_1fae1.png',
+        '🤗': 'https://emojigraph.org/media/apple/hugging-face_1f917.png',
+        '💔': 'https://emojigraph.org/media/apple/broken-heart_1f494.png',
+        '👌': 'https://emojigraph.org/media/apple/ok-hand_1f44c.png',
+        '🏆': 'https://emojigraph.org/media/apple/trophy_1f3c6.png',
+        '🌚': 'https://emojigraph.org/media/apple/new-moon-face_1f31a.png',
+        '🙈': 'https://emojigraph.org/media/apple/see-no-evil-monkey_1f648.png',
+        '❤': 'https://emojigraph.org/media/apple/red-heart_2764-fe0f.png',
+        '❤\u200d🔥': 'https://emojigraph.org/media/apple/heart-on-fire_2764-fe0f-200d-1f525.png',
+        '👎': 'https://emojigraph.org/media/apple/thumbs-down_1f44e.png',
+        '⚡': 'https://emojigraph.org/media/apple/high-voltage_26a1.png',
+        '🤨': 'https://emojigraph.org/media/apple/face-with-raised-eyebrow_1f928.png',
+        '😢': 'https://emojigraph.org/media/apple/crying-face_1f622.png',
+        '💩': 'https://emojigraph.org/media/apple/pile-of-poo_1f4a9.png',
+        '🐳': 'https://emojigraph.org/media/apple/spouting-whale_1f433.png',
+        '👀': 'https://emojigraph.org/media/apple/eyes_1f440.png',
+        '🤩': 'https://emojigraph.org/media/apple/star-struck_1f929.png',
+        '😈': 'https://emojigraph.org/media/apple/smiling-face-with-horns_1f608.png',
+        '👨‍💻': 'https://emojigraph.org/media/apple/man-technologist_1f468-200d-1f4bb.png',
+        '🕊': 'https://emojigraph.org/media/apple/dove_1f54a-fe0f.png',
+        '🍾': 'https://emojigraph.org/media/apple/bottle-with-popping-cork_1f37e.png',
+        '🎅': 'https://emojigraph.org/media/apple/santa-claus_1f385.png',
+        '💅': 'https://emojigraph.org/media/apple/nail-polish_1f485.png',
+        '☃': 'https://emojigraph.org/media/apple/snowman-without-snow_26c4.png',
+        '🎄': 'https://emojigraph.org/media/apple/christmas-tree_1f384.png',
+        '🤪': 'https://emojigraph.org/media/apple/zany-face_1f92a.png',
+        '🆒': 'https://emojigraph.org/media/apple/cool-button_1f192.png',
+        '🗿': 'https://emojigraph.org/media/apple/moai_1f5ff.png'
+    }
+
+    for (let key of Object.keys(reaction)) {
+        let e = $(`<input type="checkbox" class="btn-check emoji" id="reaction-${key}" value="${key}" autocomplete="off" name="{{ data['name'] }}">` +
+            `<label class="btn btn-outline-primary mb-3 me-3" for="reaction-${key}">` +
+            `<img src="${reaction[key]}" style="width: 20px">` +
+            '</label>')
+        $('#reactions-{{ data['name'] }}').append(e)
+    }
+
+    $('[name="{{ data['name'] }}"]').on('click', function (){
+        if(this.id === 'reaction-all')
+             $('[name="{{ data['name'] }}"]').prop('checked', this.checked)
+        else
+            $('#reaction-all').prop('checked', $('.emoji').length === $('input:checked.emoji').length);
+    })
+
+    data.push({
+        name: '{{ data['name'] }}', func: () => {
+            let emojis = $('input:checked.emoji')
+            if (!emojis.length) {
+                alert({message: 'You have not choose any reaction', type: 'danger'})
+                return
+            }
+            if ($('#reaction-all')[0].checked)
+                return 'all'
+
+            let result = []
+            for (let e of emojis)
+                result.push(e.value)
+
+            return result
+        }
+    })
+
+</script>

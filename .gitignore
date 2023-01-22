@@ -186,3 +186,5 @@ fabric.properties
 test*.py
 
 data/
+
+postgres_data/

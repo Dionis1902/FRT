@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}{{ account.first_name }}{% endblock %}
+{% block content %}
+    <div class="flex-grow-1">
+        <div class="row h-100">
+            <div class="col-3">
+                {% include 'account/photos.html' %}
+            </div>
+            <div class="col">
+                {% include 'account/info.html' %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function lockButtons(lock) {
+            lockPhotoButtons(lock)
+            lockInfoButtons(lock)
+        }
+
+        handleFunctions.lock_buttons = lockButtons
+        handleFunctions.update_account_info = updateAccountData
+    </script>
+{% endblock %}

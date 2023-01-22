@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+    <form method="post" action="/api/settings" target="dummyFrame">
+        <div class="row">
+            <div class="col-6 mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" placeholder="username" name="username" id="username" required>
+            </div>
+            <div class="col-6 mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" placeholder="super_secret_password" name="password" id="password" required>
+                    <button type="button" class="input-group-text togglePassword" data-id="password">
+                        <i class="bi bi-eye-fill" style="height: auto"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-6 mb-3">
+                <label for="apiId" class="form-label">API ID
+                    <a href="https://core.telegram.org/api/obtaining_api_id#obtaining-api-id" target="_blank" rel="noopener"><i class="bi bi-info-circle-fill"></i></a>
+                </label>
+                <input type="text" class="form-control" name="api_id" id="apiId" placeholder="00000000" pattern="^\d+$" required>
+            </div>
+            <div class="col-6 mb-3">
+                <label for="apiHash" class="form-label">API HASH</label>
+                <input type="text" class="form-control" name="api_hash" placeholder="991d9991744899a99a7225e992c06991" id="apiHash" required>
+            </div>
+            <div class="col-12 mb-3">
+                <label for="proxy" class="form-label">Proxy (Recommend use rotate proxy)
+                    <a href="https://www.webshare.io/?referral_code=kwcy3asqr6la" target="_blank" rel="noopener"><i class="bi bi-info-circle-fill"></i></a>
+                </label>
+                <input type="text" class="form-control" name="proxy" placeholder="socks5://username:password@hostname.com:80" id="proxy" pattern="^(?:(?:(socks[45])://)(?:[a-zA-Z0-9._%+-]+(?::[a-zA-Z0-9._%+-]+)?@)?)((?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::(\d+))?$">
+            </div>
+            <div class="col-12 mb-3">
+                <label for="hashPassword" class="form-label">Password, used during password generation, better never to change after set (Can be empty)</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" placeholder="super_secret_password" name="hash_password" id="hashPassword">
+                    <button type="button" class="input-group-text togglePassword" data-id="hashPassword">
+                        <i class="bi bi-eye-fill" style="height: auto"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label for="floodWait" class="form-label">Maximum waiting time for flood ban</label>
+                    <input type="number" class="form-control" placeholder="60" name="flood_wait" id="floodWait">
+                </div>
+            </div>
+             <div class="col-6 mb-3">
+                <label for="firstNames" class="form-label">First names (If empty the default will be used)</label>
+                 <textarea class="form-control" id="firstNames" name="first_names" rows="3"></textarea>
+            </div>
+             <div class="col-6 mb-3">
+                <label for="lastNames" class="form-label">Last names (If empty the default will be used)</label>
+                 <textarea class="form-control" id="lastNames" name="last_names" rows="3"></textarea>
+            </div>
+            <div class="col-12 mb-3 d-flex">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="usePassword" name="use_password" checked>
+                    <label class="form-check-label" for="usePassword">
+                        Set password after create account (Recommend)
+                    </label>
+                </div>
+                <div class="form-check ms-3">
+                    <input class="form-check-input" type="checkbox" id="lastName" name="use_last_name" checked>
+                    <label class="form-check-label" for="lastName">
+                        Set random last name after create account
+                    </label>
+                </div>
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Save</button>
+            </div>
+        </div>
+    </form>
+    <script>
+        $('.togglePassword').on('click', function () {
+            let e = $('#' + $(this).data('id'))
+            if (e.attr('type') === 'password') {
+                e.attr('type', 'text')
+                $(this).html('<i class="bi bi-eye-slash-fill" style="height: auto"></i>')
+            } else {
+                e.attr('type', 'password')
+                $(this).html('<i class="bi bi-eye-fill" style="height: auto"></i>')
+            }
+        })
+
+        function setSettings(data){
+            for(let key of Object.keys(data)){
+                let e = $("[name='" + key + "']")
+                if(typeof(data[key]) === "boolean")
+                    e.attr('checked', data[key] === data[key])
+                else if (Array.isArray(data[key]))
+                    e.val(data[key].join('\r\n'))
+                else
+                    e.val(data[key])
+            }
+        }
+
+        setSettings({{ settings.get_all() | replace('True', 'true') | replace('False', 'false') | safe }})
+
+        {{ 'alert({message: "You must set api id and api hash", type: "danger"})'|safe if not settings.get('api_hash') or not settings.get('api_id') else '' }}
+    </script>
+{% endblock %}

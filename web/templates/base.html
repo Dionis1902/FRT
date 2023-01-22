@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://getbootstrap.com/docs/5.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.3/build/css/intlTelInput.css">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://web.telegram.org/z/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://web.telegram.org/z/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://web.telegram.org/z/icon-192x192.png">
+    <link rel="alternate icon" href="https://web.telegram.org/z/favicon.ico" type="image/x-icon">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://getbootstrap.com/docs/5.3/assets/js/color-modes.js"></script>
+    <title>{% block title %}{% endblock %}</title>
+    <style>
+        [data-bs-theme=light] .trash:before {
+          content: '\F78A';
+        }
+        [data-bs-theme=light] .x-square:before {
+          content: '\F628';
+        }
+        [data-bs-theme=light] .check-square:before {
+          content: '\F26C';
+        }
+        [data-bs-theme=light] .pencil:before {
+          content: '\F4C9';
+        }
+
+        [data-bs-theme=dark] .trash:before {
+          content: '\F78B';
+        }
+        [data-bs-theme=dark] .x-square:before {
+          content: '\F629';
+        }
+        [data-bs-theme=dark] .check-square:before {
+          content: '\F26D';
+        }
+        [data-bs-theme=dark] .pencil:before {
+          content: '\F4CB';
+        }
+    </style>
+
+</head>
+<body class="h-100">
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+<script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://getbootstrap.com/docs/5.3/assets/js/docs.min.js"></script>
+
+{% include 'navbar.html' %}
+<iframe name="dummyFrame" id="dummyFrame" style="display: none"></iframe>
+<script>
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+
+    function makeId(length) {
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+    let tabIds = {}
+    let tabID = null
+
+    if (sessionStorage.tabIds) {
+        tabIds = JSON.parse(sessionStorage.tabIds);
+        tabID = sessionStorage.tabIds && tabIds[location.pathname] ? tabIds[location.pathname] : makeId(16)
+        if (!tabIds[location.pathname])
+            tabIds[location.pathname] = tabID
+
+    } else {
+        tabID = makeId(16)
+        tabIds[location.pathname] = tabID
+    }
+
+    sessionStorage.tabIds = JSON.stringify(tabIds)
+
+    function autoClose(element) {
+        setTimeout(function () {
+            element.remove();
+        }, 5000)
+    }
+
+    const alert = ({message, type = 'success'}) => {
+        let $wrapper = $('<div>').addClass(`alert alert-${type} alert-dismissible`).attr({role: 'alert'});
+        $wrapper.html(`
+    <div>${message}</div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `);
+        $('#alerts').prepend($wrapper);
+        autoClose($wrapper);
+    }
+    let handleFunctions = {}
+    handleFunctions.alert = alert
+    let ws
+
+    function sendData(data) {
+        ws.send(JSON.stringify(data))
+    }
+
+    function sendHandler(func, data) {
+        let dataToSend = {'handler': {'func': func}}
+        if (data)
+            dataToSend['handler']['data'] = data
+        sendData(dataToSend)
+    }
+
+    function onConnect(){
+
+    }
+
+    function connect() {
+        ws = new WebSocket("ws://" + window.location.host + "/ws")
+
+        ws.onopen = function () {
+            ws.send(JSON.stringify({path: location.pathname, tab_id: tabID}))
+            onConnect()
+        }
+
+        ws.onmessage = function (event) {
+            let data = JSON.parse(event.data)
+            for (const key in data) {
+                let func = handleFunctions[key]
+                if (func && typeof (func) === 'function')
+                    func(data[key])
+            }
+        }
+
+        ws.onclose = function () {
+            connect()
+        }
+        ws.onerror = function () {
+            ws.close()
+        }
+    }
+
+    function reloadPage() {
+        window.location.reload()
+    }
+
+    handleFunctions.reload_page = reloadPage
+
+</script>
+<div>
+    <div class="position-absolute end-0 pt-3 pe-3 h-75 overflow-hidden" id="alerts" style="z-index: 9999"></div>
+    <div class="container pt-3 pb-3">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+<script>
+    let input = $("<input>")
+        .attr("type", "hidden")
+        .attr("name", "tab_id").val(tabID);
+    $('form').append(input);
+    connect()
+</script>
+</body>
+</html>

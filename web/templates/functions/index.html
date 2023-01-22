@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Functions{% endblock %}
+{% block content %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col" style="width: 20%">Name</th>
+            <th scope="col" class="text-center">Description</th>
+            <th scope="col" class="text-center" style="width: 10%">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for function in functions %}
+        <tr>
+            <td class="text-break">{{ function['function_name'] }}</td>
+            <td class="text-center text-break">{{ function['description'] }}</td>
+            <td class="text-center"><a href="/functions/{{ function['id'] }}"><i class="bi bi-pencil-square text-success"></i></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

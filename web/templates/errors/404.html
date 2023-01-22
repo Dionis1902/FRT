@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}404{% endblock %}
+{% block content %}
+    <div class="vh-100 w-100 position-absolute top-0 start-0">
+        <div class="d-flex align-items-center justify-content-center h-100 container">
+            <div class="text-center">
+                <h1 class="display-1 fw-bold">404</h1>
+                <p class="fs-3"><span class="text-danger">Opps!</span> Page not found</p>
+                <p class="lead">
+                    The page you're looking for doesn't exist
+                </p>
+                <a href="/accounts" class="btn btn-primary">Go Home</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

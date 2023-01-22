@@ -1,0 +1,126 @@
+<div>
+    <div class="form-check form-switch mb-3">
+        <input class="form-check-input" type="checkbox" role="switch" id="accountsType" checked>
+        <label for="accountsChoose" class="form-check-label">Random accounts</label>
+    </div>
+    <div id="accounts-choose">
+        <div id="random-accounts">
+            <label for="accounts-number" class="visually-hidden">Email</label>
+            <input type="number" class="form-control mb-3 accounts-count" id="accounts-number" min="1" max="1" value="1">
+            <input type="range" class="form-range accounts-count" min="1" max="1" value="1">
+        </div>
+        <div id="choose-accounts" style="display: none">
+            <table class="table text-center">
+                <thead>
+                <tr>
+                    <th scope="col"><input class="form-check-input accounts" type="checkbox" id="all"></th>
+                    <th scope="col">ID</th>
+                    <th scope="col">First name</th>
+                    <th scope="col">Last name</th>
+                    <th scope="col">Phone number</th>
+                    <th scope="col">Nickname</th>
+                    <th scope="col">Is Premium</th>
+                </tr>
+                </thead>
+                <tbody id="accountsTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    // name
+    $('.accounts-count').on('change', function () {
+        $('.accounts-count').val($(this).val())
+    })
+
+    $('#accountsType').on('change', function () {
+        let random = $('#random-accounts')
+        let choose = $('#choose-accounts')
+        if (this.checked) {
+            random.attr('style', '')
+            choose.attr('style', 'display: none')
+        } else {
+            choose.attr('style', '')
+            random.attr('style', 'display: none')
+        }
+    })
+
+    function onInputChange() {
+        if (this.id === 'all')
+            $('.accounts.current').prop('checked', this.checked);
+        else
+            $('#all').prop('checked', $('.accounts.current').length === $('input:checked.accounts.current').length);
+    }
+
+    function insertElement({user_id, first_name, last_name, phone_number, username, is_premium, county_code}) {
+        const lastName = last_name ? last_name : "<i class='text-danger bi x-square'></i>";
+        const usernameHTML = username ? `<a href="https://t.me/${username}">@${username}</a>` : "<i class='text-danger bi x-square'></i>";
+        const isPremiumHTML = is_premium ? "<i class='text-success bi check-square'></i>" : "<i class='text-danger bi x-square'></i>";
+
+        const $tr = $(`
+    <tr>
+      <td><input class='form-check-input current accounts' type='checkbox' onclick="onInputChange()" id='${user_id}'></td>
+      <td>${user_id}</td>
+      <td>${first_name}</td>
+      <td>${lastName}</td>
+      <td>+${phone_number} <span class="fi fi-${county_code}"></span></td>
+      <td>${usernameHTML}</td>
+      <td>${isPremiumHTML}</td>
+    </tr>
+  `);
+        $("#accountsTable").append($tr);
+    }
+
+    $(document).ready(function () {
+        $.ajax({
+            url: "/api/accounts?only_premium={{ data.get('only_premium', False) }}&with_spam_block={{ data.get('with_spam_block', True) }}",
+            type: 'GET',
+            dataType: 'json',
+            success: function (accounts) {
+                if (accounts.length === 0) {
+                    $('.nav-link').addClass('disabled').removeClass('active')
+                    alert({message: "Add the necessary accounts to the database", type: "danger"})
+                }
+
+                for (let account of accounts)
+                    insertElement(account)
+                $('.accounts-count').attr('max', accounts.length)
+            }
+        });
+    })
+
+    function getIds() {
+        if ($('#all')[0].checked)
+            return 'all'
+        else {
+            let idsArray = []
+            for (let e of $('input:checked.current'))
+                idsArray.push(parseInt(e.id))
+            return idsArray
+        }
+    }
+
+    $('#all').change(onInputChange)
+
+    data.push({
+        name: '{{ data['name'] }}', func: () => {
+            if ($('#accountsType')[0].checked) {
+                return {
+                    ids: parseInt($('#accounts-number').val()),
+                    params: {only_premium: {{ data.get('only_premium', False)|lower}}, with_spam_block: {{data.get('with_spam_block', True)|lower}}}
+                }
+            } else {
+                let ids = getIds()
+                if (!ids) {
+                    alert({message: 'You must select minimum 1 account', type: 'danger'})
+                    return
+                }
+                return {
+                    ids: ids,
+                    params: {only_premium: {{ data.get('only_premium', False)|lower}}, with_spam_block: {{data.get('with_spam_block', True)|lower}}}
+                }
+            }
+        }
+    })
+
+</script>

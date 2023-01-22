@@ -1,0 +1,31 @@
+<div class="modal fade" id="sessionFilesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add account by session files</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <form id="sessionFilesForm" method="post" action="/api/accounts/add/session" target="dummyFrame" enctype="multipart/form-data">
+                        <label for="files" class="col-form-label">Session files</label>
+                        <input type="file" class="form-control" name="files" id="sessionFileInput" accept=".session" multiple required>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi-x-lg"></i> Close</button>
+                <button type="button" class="btn btn-primary" onclick="sendSessionFilesData()"><i class="bi bi-check-lg"></i> Add Accounts</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function sendSessionFilesData() {
+        if ($('#sessionFileInput')[0].files.length) {
+            $('#sessionFilesForm').submit()
+        } else {
+            alert({message: 'You must enter files', type: 'danger'})
+        }
+    }
+</script>

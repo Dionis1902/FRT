@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block title %}Task #{{ task.id }}{% endblock %}
+{% block content %}
+    <style>
+        .bar {
+            height: 25px;
+            background-color: #DAD9D9;
+            width: 100%;
+            border-radius: 5px 5px 0px 0px;
+        }
+
+        .point {
+            border-radius: 100%;
+            width: 15px;
+            height: 15px;
+            margin-left: 15px;
+        }
+
+        .screen {
+            background-color: black;
+            height: 350px;
+            border-radius: 0px 0px 5px 5px;
+
+        }
+
+        .screen p {
+            margin: 0px
+        }
+
+        .font {
+            color: #fff;
+            font-family: monospace;
+            font-size: 15px;
+            text-align: left;
+            position: static;
+        }
+    </style>
+    <div class="modal fade" id="stopModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Stop task</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to do this?
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi-x-lg"></i> Close</button>
+                <button type="button" class="btn btn-primary" onclick="stopTask()"><i class="bi bi-slash-square"></i> Stop</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="padding-top: 66px">
+        <div class="container pt-3 pb-3 d-flex flex-column h-100">
+            <div class="d-flex ">
+                <div>
+                    <h5>Task #{{ task.id }}</h5>
+                    <p class="mb-0">Status : <b id="status"></b></p>
+                    <p class="mb-0" id="status">Started at : <b id="startedAt"></b></p>
+                    <p id="accounts">Used accounts :
+                        {% for account in task.accounts %}
+                            <a href="/accounts/{{ account }}">{{ account }}</a>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="ms-auto">
+                    <button class="btn btn-primary {{ 'disabled' if task.status == 'progress' else '' }} choose-accounts need-lock" role="button"
+                            onclick="exportLog()">
+                        <i class="bi-cloud-download"></i> Export
+                    </button>
+                    {% if task.status == 'progress' %}
+                        <button id="stop" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#stopModal"><i class="bi-slash-square"></i> Stop</button>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="w-100 h-100">
+                <div class="bar d-flex align-items-center">
+                    <div class="point" style="background-color: #E94B35"></div>
+                    <div class="point" style="background-color: #f0f000"></div>
+                    <div class="point" style="background-color: #1AAF5C"></div>
+                </div>
+                <div class="screen font w-100">
+                    <div class="overflow-auto ps-3 pe-3 pt-2 pb-2 h-100" id="console">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let options = {
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        };
+
+        let elements = {
+            progress: {text: 'In progress', type: 'primary'},
+            error: {text: 'Error', type: 'danger'},
+            stopped: {text: 'Stopped', type: 'warning'},
+            killed: {text: 'Killed', type: 'danger'},
+            finished: {text: 'Finished', type: 'success'}
+        }
+
+        $('#status').text(elements['{{ task.status }}']['text']).addClass('text-' + elements['{{ task.status }}']['type'])
+
+        let date = new Date('{{ task.start_time }}Z');
+        let formattedDate = date.toLocaleString('en-US', options);
+        $('#startedAt').text(formattedDate)
+
+        function log(message) {
+            let console = $('#console')
+            console.append($(`<p>${message}</p>`))
+            console.scrollTop(console[0].scrollHeight)
+        }
+
+        function logMessage(message) {
+            if (Array.isArray(message))
+                for (let e of message)
+                    log(e)
+            else
+                log(message)
+        }
+
+        function onConnect() {
+            sendHandler('init_logs', {manager: null, task_id: {{ task.id }}})
+        }
+
+        function stopTask() {
+            $('#stop').addClass('disabled')
+            $.ajax({
+                url: '/api/tasks/{{ task.id }}',
+                type: 'DELETE',
+                success: function () {
+                    window.location.reload()
+                }
+            });
+        }
+
+        function exportLog() {
+            let element = document.createElement('a');
+            element.setAttribute('href', '/api/tasks/log/{{ task.id }}')
+            element.download = 'Task #{{ task.id }}.log'
+            document.body.appendChild(element)
+            element.click()
+            document.body.removeChild(element)
+        }
+
+        handleFunctions.logging_message = logMessage
+    </script>
+{% endblock %}

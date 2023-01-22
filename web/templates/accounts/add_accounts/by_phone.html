@@ -1,0 +1,155 @@
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.3/build/js/intlTelInput.js"></script>
+<style>
+    .iti {
+        width: 100%;
+        position: relative;
+        display: inline-block;
+    }
+
+</style>
+<div class="modal fade" id="phoneModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add account by phone</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <form id="sessionPhone" method="post" action="/api/accounts/add/phone" target="dummyFrame">
+                        <div>
+                            <label for="phoneNumber" class="col-form-label">Phone number</label>
+                        </div>
+                        <input type="tel" class="form-control" id="phoneNumber" pattern="^\d+$" required>
+                        <input type="hidden" class="form-control" name="phone" required>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi-x-lg"></i> Close</button>
+                <button type="button" class="btn btn-primary" onclick="sendPhone()"><i class="bi bi-check-lg"></i> Send code</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="askCodeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter code</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="stopAccountAdd()"></button>
+            </div>
+            <div class="modal-body">
+                <label for="code" id="codeLabel" class="col-form-label"></label>
+                <input type="text" placeholder="00000" class="form-control" id="code" pattern="^\d{5}$" value="" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="stopAccountAdd()"><i class="bi-x-lg"></i> Close</button>
+                <button type="button" class="btn btn-primary" onclick="sendCode()"><i class="bi bi-check-lg"></i> Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="askPasswordModal" data-for-qr-code="false" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="staticBackdropLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter password</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="stopAccountAdd()"></button>
+            </div>
+            <div class="modal-body">
+                <label for="password" id="passwordLabel" class="col-form-label"></label>
+                <input type="text" placeholder="super_secret_password" class="form-control" id="password" value="" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="stopAccountAdd()"><i class="bi-x-lg"></i> Close</button>
+                <button type="button" class="btn btn-primary" onclick="sendPassword()"><i class="bi bi-check-lg"></i> Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let askCodeModal = new bootstrap.Modal('#askCodeModal', {})
+    let askPasswordModal = new bootstrap.Modal('#askPasswordModal', {})
+
+    function isNumeric(num) {
+        if (num === '' || num === null) {
+            return false
+        }
+        return !isNaN(num)
+    }
+
+    function openAskCode(message) {
+        let interval = setInterval(function () {
+            if (askCodeModal._isShown || askCodeModal._isTransitioning || askCodeModal.defaultPrevented)
+                return
+            $('#codeLabel').text('Code (' + message + ')')
+            askCodeModal.show()
+            clearInterval(interval)
+
+        }, 1000)
+    }
+
+    function openAskPassword({hint, to_qr_code = false}) {
+        let interval = setInterval(function () {
+            if (askPasswordModal._isShown || askPasswordModal._isTransitioning || askPasswordModal.defaultPrevented)
+                return
+            if (to_qr_code)
+                qrCodeModal.hide()
+            $('#askPasswordModal').attr('data-for-qr-code', to_qr_code)
+            $('#passwordLabel').text('Password ' + (hint ? '(' + hint + ')' : ''))
+            askPasswordModal.show()
+            clearInterval(interval)
+        }, 1000)
+    }
+
+    function stopAccountAdd() {
+        sendHandler('close_phone_add')
+    }
+
+    function sendCode() {
+        let element = $('#code')
+        let code = element.val()
+        if (code.length !== 5 || !isNumeric(code)) {
+            alert({message:'Invalid code format', type:'danger'})
+            return
+        }
+
+        sendHandler('code', {'code': code})
+        askCodeModal.hide()
+        element.val('')
+    }
+
+    function sendPassword() {
+        let element = $('#password')
+        let password = element.val()
+        if (password.length === 0) {
+            alert({message:'Invalid password format', type:'danger'})
+            return
+        }
+        sendHandler($('#askPasswordModal').attr('data-for-qr-code') === 'true' ? 'password_qr_code' : 'password', {'password': password})
+        askPasswordModal.hide()
+        element.val('')
+    }
+
+    let iti = window.intlTelInput(document.querySelector("#phoneNumber"), {
+        separateDialCode: true,
+        utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.3/build/js/utils.js",
+        preferredCountries: []
+    });
+
+    let sessionPhone = $('#sessionPhone')
+
+    sessionPhone.submit(function () {
+        let full_number = iti.getNumber(intlTelInputUtils.numberFormat.E164)
+        $("[name='phone']").val(full_number)
+        $("#phoneNumber").val('')
+    })
+
+    function sendPhone() {
+        sessionPhone.submit()
+    }
+</script>

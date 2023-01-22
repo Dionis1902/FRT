@@ -1,0 +1,33 @@
+<div class="modal fade" id="sessionStringModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add account by session string</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bySessionStringForm" method="post" action="/api/accounts/add/session" target="dummyFrame" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="session_string" class="col-form-label">Session string</label>
+                        <input type="text" class="form-control" name="session_string" id="bySessionStringString" placeholder="AQG9jqAAxQ8kk_MQUCxzHyvFXL8W...." required>
+                        <label for="files" class="col-form-label">File with session strings</label>
+                        <input type="file" class="form-control" name="files" id="bySessionStringFiles" accept=".txt" required multiple>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi-x-lg"></i> Close</button>
+                <button type="button" class="btn btn-primary send-session-string" onclick="sendSessionStringData()"><i class="bi bi-check-lg"></i> Add Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function sendSessionStringData() {
+        if (!$('#bySessionStringFiles')[0].files.length && !$('#bySessionStringString').val()) {
+            alert({message:'You must enter session string or file', type: 'danger'})
+            return
+        }
+        $('#bySessionStringForm').submit()
+    }
+</script>

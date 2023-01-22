@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% block title %}Accounts{% endblock %}
+{% block content %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css"/>
+    {% include 'accounts/add_accounts/by_phone.html' %}
+    {% include 'accounts/add_accounts/by_session_files.html' %}
+    {% include 'accounts/add_accounts/by_session_string.html' %}
+    {% include 'accounts/add_accounts/by_qr_code.html' %}
+    {% include 'accounts/add_accounts/by_tdata.html' %}
+    {% include 'accounts/delete_account_modal.html' %}
+
+    <div class="d-flex justify-content-between">
+        <div class="d-flex align-items-center">
+            <div class="dropdown">
+                <button class="btn btn-primary need-lock" href="#" role="button" id="dropdownMenuAddAccounts" data-bs-toggle="dropdown" aria-expanded="false">
+                    <load-accounts><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></load-accounts> Add account
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuAddAccounts">
+                    <li><a class="dropdown-item" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#phoneModal"><i class="bi-telephone-plus"></i> By Phone Number</a></li>
+                    <li><a class="dropdown-item" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#sessionFilesModal"><i class="bi-file-earmark-check"></i> By Session File</a></li>
+                    <li><a class="dropdown-item" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#sessionStringModal"><i class="bi-file-earmark-text"></i> By Session String</a></li>
+                    <li><a class="dropdown-item" style="cursor: pointer" onclick="openQRCode()"><i class="bi-qr-code"></i> By QR Code</a></li>
+                    <li><a class="dropdown-item" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#tdataModal"><i class="bi-file-earmark-binary"></i> By TData</a></li>
+                </ul>
+            </div>
+            <h5 class="mb-0 ms-3"><i class="bi-people-fill"></i> Accounts in database
+                <accounts-count>0</accounts-count>
+            </h5>
+        </div>
+        <div class="flex-grow-1 ms-3 me-3 d-flex align-items-center" id="progressBar">
+        </div>
+
+        <div>
+            <button class="btn btn-success me-2 disabled choose-accounts need-lock" role="button" onclick="validateAccounts()">
+                <i class="bi-clipboard2-pulse"></i> Validate
+            </button>
+
+            <button class="btn btn-danger me-2 disabled choose-accounts need-lock" role="button" onclick="askDeleteAccounts()">
+                <i class="bi-trash3"></i> Delete
+            </button>
+
+            <button class="btn btn-primary disabled choose-accounts need-lock" role="button" onclick="exportAccounts()">
+                <i class="bi-cloud-download"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        {% include 'accounts/table.html' %}
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: "/api/accounts",
+                type: 'GET',
+                dataType: 'json',
+                success: function (accounts) {
+                    for (let account of accounts)
+                        insertElement(account)
+                    $('accounts-count').text(accounts.length)
+                }
+            });
+        })
+
+        function closeModals(){
+            for (let element of $('.modal')) {
+                let modal = bootstrap.Modal.getInstance(element)
+                if (modal)
+                    modal.hide();
+            }
+        }
+
+
+        function lockButtons(state) {
+            $('.need-lock')[state ? 'addClass': 'removeClass']('disabled')
+            let lockLoad = $('load-accounts')
+            if(!state) {
+                lockLoad.html('<i class="bi-person-fill-add"></i>')
+                $('.choose-accounts')[$('input:checked.accounts.current').length ? 'removeClass' : 'addClass']('disabled')
+            }
+            else{
+                lockLoad.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>')
+                closeModals()
+            }
+        }
+
+        lockButtons(true)
+
+        function createProgressBar(totalCount, successAdded = 0, alreadyAdded = 0, errorAdded = 0) {
+            let successAddedWidth = (successAdded / totalCount) * 100;
+            let alreadyAddedWidth = (alreadyAdded / totalCount) * 100;
+            let errorAddedWidth = (errorAdded / totalCount) * 100;
+            let remainsWidth = 100 - successAddedWidth - alreadyAddedWidth - errorAddedWidth;
+            let $progressBar = $(`
+    <div class="progress w-100">
+      <div class="progress-bar" id="successAdded" style="width: ${successAddedWidth}%">${successAdded}</div>
+      <div class="progress-bar bg-warning" id="alreadyAdded" style="width: ${alreadyAddedWidth}%">${alreadyAdded}</div>
+      <div class="progress-bar bg-danger" id="errorAdded" style="width: ${errorAddedWidth}%">${errorAdded}</div>
+      <div class="progress-bar bg-secondary" id="remains" style="width: ${remainsWidth}%">${totalCount - successAdded - alreadyAdded - errorAdded}</div>
+    </div>
+  `);
+            $('#progressBar').append($progressBar);
+        }
+
+        function updateProgressBar(totalCount, successAdded, alreadyAdded, errorAdded) {
+            let successAddedWidth = (successAdded / totalCount) * 100
+            let alreadyAddedWidth = (alreadyAdded / totalCount) * 100
+            let errorAddedWidth = (errorAdded / totalCount) * 100
+            let remainsWidth = 100 - successAddedWidth - alreadyAddedWidth - errorAddedWidth
+            $('#successAdded').css('width', `${successAddedWidth}%`).html(successAdded)
+            $('#alreadyAdded').css('width', `${alreadyAddedWidth}%`).html(alreadyAdded)
+            $('#errorAdded').css('width', `${errorAddedWidth}%`).html(errorAdded)
+            $('#remains').css('width', `${remainsWidth}%`).html(totalCount - successAdded - alreadyAdded - errorAdded)
+        }
+
+        function createOrUpdateProgressBar({total_count, success_added = 0, already_added = 0, error_added = 0}) {
+            if(!total_count)
+                return
+            let $progressBar = $('#progressBar .progress')
+            if ($progressBar.length)
+                updateProgressBar(total_count, success_added, already_added, error_added)
+            else
+                createProgressBar(total_count, success_added, already_added, error_added)
+        }
+
+        function deleteProgressBar() {
+            $("#progressBar .progress").remove()
+        }
+
+        function clearTable(data){
+            let $accountCounts = $('accounts-count')
+            if(data === 'all') {
+                $('#accountsTable').html('')
+                $accountCounts.text(0)
+            }
+            else{
+                $accountCounts.text(parseInt($accountCounts.text()) - data.length)
+                for(let id of data){
+                    let e = $(`#accountsTable #${id}`)
+                    if(e.length)
+                        e.closest('tr').remove()
+            }}
+        }
+
+         function getIds() {
+            let ids = ''
+            if($('#all')[0].checked)
+                ids = 'all'
+            else {
+                let idsArray = []
+                for(let e of $('input:checked.current'))
+                    idsArray.push(e.id)
+                ids = idsArray.join(',')
+            }
+            return ids
+        }
+
+        handleFunctions.update_or_create_progress = createOrUpdateProgressBar
+        handleFunctions.remove_progress = deleteProgressBar
+        handleFunctions.lock_buttons = lockButtons
+        handleFunctions.add_new_user = insertElement
+        handleFunctions.qrcode_login = showQrCode
+        handleFunctions.close_qr_code = () => qrCodeModal.hide()
+        handleFunctions.ask_code = openAskCode
+        handleFunctions.ask_password = openAskPassword
+        handleFunctions.clear_table = clearTable
+        handleFunctions.delete_accounts = deleteAccounts
+
+
+        function openQRCode(){
+            $.ajax({
+                url: "/api/accounts/add/qrcode" ,
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify( { "tab_id": tabID } ),
+                processData: false
+            });
+        }
+
+        function exportAccounts() {
+            let ids = getIds()
+            if(ids.length === 0)
+                return
+            let element = document.createElement('a');
+            element.setAttribute('href', '/api/accounts/export/?ids=' + ids)
+
+            element.style.display = 'none'
+            if (ids === 'all')
+                element.download = 'Export All Accounts.txt'
+            else
+                element.download = 'Export ' + ids.split(',').length + ' Accounts.txt'
+            document.body.appendChild(element)
+
+            element.click()
+
+            document.body.removeChild(element)
+        }
+
+        function validateAccounts() {
+            let ids = getIds()
+            if (ids.length === 0)
+                return
+            $.ajax({
+                url: "/api/accounts/validate/?tab_id=" + tabID + "&ids=" + ids,
+                type: 'GET'
+            });
+    }
+
+        $(document).on('hidden.bs.modal', function (e){
+            $(e.target).find('input:not(:hidden):not(:file)').val('')
+            $(e.target).find('input:file').val(null)
+        })
+    </script>
+{% endblock %}

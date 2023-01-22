@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ function['function_name'] }}{% endblock %}
+{% block content %}
+    <script>
+        let data = []
+
+        function getData() {
+            let result = {}
+
+            for (let e of data) {
+                let r = e['func']()
+                if (!r) {
+                    return
+                }
+                result[e['name']] = r
+            }
+
+            return result
+        }
+
+        function sendData() {
+            let r = getData()
+            if (!r)
+                return
+            $('#startButton').addClass('disabled').removeClass('active')
+
+            $.ajax({
+                url: '/api/tasks/{{ function['id'] }}',
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/json',
+                data: JSON.stringify(r),
+                processData: false,
+                success: function (res) {
+                    window.open('/tasks/' + res['task_id'] ,'_self')
+                }, error: function () {
+                    alert({message: 'Hmmm, try again', type: 'danger'});
+                }
+            });
+        }
+
+    </script>
+
+    <ul class="nav nav-tabs" role="tablist">
+        {% for e in function['input_data'] %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {{ 'active' if loop.index0 == 0 else '' }}" data-bs-toggle="tab" data-bs-target="#{{ e['data']['name'] }}" type="button"
+                        role="tab">
+                    {{ e['data']['label_name'] }}
+                </button>
+            </li>
+        {% endfor %}
+        <li class="nav-item ms-auto">
+            <button class="nav-link active" onclick="sendData()" id="startButton">Start</button>
+        </li>
+    </ul>
+    <div class="tab-content">
+        {% for e in function['input_data'] %}
+            <div class="tab-pane fade {{ 'show active' if loop.index0 == 0 else '' }} mt-3" id="{{ e['data']['name'] }}" role="tabpanel" tabindex="0">
+                {% with data=e.get('data') %}
+                    {% include "functions/type/" + e['html'] + ".html" %}
+                {% endwith %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

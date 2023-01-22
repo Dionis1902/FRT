@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+    <div class="vh-100 w-100 position-absolute top-0 start-0">
+        <div class="d-flex align-items-center justify-content-center h-100 container flex-column">
+            <h3>Need login</h3>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" name="username" id="username" placeholder="admin" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="super_secret_password" required>
+                </div>
+                <button type="submit" value="ok" class="btn btn-success w-100">Login</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        {{ ('alert({message: "' + error_data['message'] + '", type: "' + error_data['type'] + '"})')|safe if error_data else '' }}
+    </script>
+{% endblock %}

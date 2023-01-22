@@ -1,0 +1,70 @@
+<div>
+    <div class="row mb-3">
+        <div class="col">
+            <label for="inputMinAccount" class="form-label">Minimal timeout for change account (seconds)</label>
+            <input type="number" class="form-control settings-data-timeout" min="1" id="inputMinAccount" value="3">
+        </div>
+        <div class="col">
+            <label for="inputMaxAccount" class="form-label">Maximum timeout for change account (seconds)</label>
+            <input type="number" class="form-control settings-data-timeout" min="1" id="inputMaxAccount" value="5">
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <label for="inputMinActions" class="form-label">Minimal timeout for actions (seconds)</label>
+            <input type="number" class="form-control settings-data-timeout" min="1" id="inputMinActions" value="3">
+        </div>
+        <div class="col">
+            <label for="inputMaxActions" class="form-label">Maximum timeout for actions (seconds)</label>
+            <input type="number" class="form-control settings-data-timeout" min="1" id="inputMaxActions" value="5">
+        </div>
+    </div>
+    <div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="skipAccount" checked>
+            <label class="form-check-label" for="skipAccount">
+                Replace invalid accounts (Work only for random accounts)
+            </label>
+        </div>
+    </div>
+</div>
+<script>
+    // name
+    let inputMinAccount = $('#inputMinAccount')
+    let inputMaxAccount = $('#inputMaxAccount')
+    let inputMinActions = $('#inputMinActions')
+    let inputMaxActions = $('#inputMaxActions')
+
+    inputMinAccount.on('change', function () {
+        if (parseInt(inputMaxAccount.val()) < parseInt(inputMinAccount.val()))
+            inputMaxAccount.val(inputMinAccount.val())
+
+    })
+
+    inputMaxAccount.on('change', function () {
+        if (parseInt(inputMaxAccount.val()) < parseInt(inputMinAccount.val()))
+            inputMinAccount.val(inputMaxAccount.val())
+    })
+
+    inputMinActions.on('change', function () {
+        if (parseInt(inputMaxActions.val()) < parseInt(inputMinActions.val()))
+            inputMaxActions.val(inputMinActions.val())
+
+    })
+
+    inputMaxActions.on('change', function () {
+        if (parseInt(inputMaxActions.val()) < parseInt(inputMinActions.val()))
+            inputMinActions.val(inputMaxActions.val())
+    })
+
+    data.push({
+        name: '{{ data['name'] }}', func: () => {
+            return {
+                account_timeout: [parseInt(inputMinAccount.val() || 1), parseInt(inputMaxAccount.val() || 5)],
+                action_timeout: [parseInt(inputMinActions.val() || 1), parseInt(inputMaxActions.val() || 5)],
+                replace_account: $('#skipAccount').is(':checked')
+            }
+        }
+    })
+
+</script>

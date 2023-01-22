@@ -1,0 +1,64 @@
+<table class="table text-center">
+    <thead>
+    <tr>
+        <th scope="col"><input class="form-check-input accounts" type="checkbox" id="all"></th>
+        <th scope="col">ID</th>
+        <th scope="col">First name</th>
+        <th scope="col">Last name</th>
+        <th scope="col">Phone number</th>
+        <th scope="col">Nickname</th>
+        <th scope="col">Is Premium</th>
+        <th scope="col">Using</th>
+        <th scope="col">Action</th>
+    </tr>
+    </thead>
+    <tbody id="accountsTable"></tbody>
+</table>
+<script>
+    function onInputChange() {
+       const buttons = $('.choose-accounts');
+        if (this.id === 'all')
+            $('.accounts.current').prop('checked', this.checked);
+        else
+            $('#all').prop('checked', $('.accounts.current').length === $('input:checked.accounts.current').length);
+         if ($('#dropdownMenuAddAccounts').hasClass('disabled')){
+             buttons.addClass('disabled')
+         }else
+            buttons[$('input:checked.accounts.current').length ? 'removeClass' : 'addClass']('disabled');
+    }
+
+
+    function insertElement({user_id, first_name, last_name, phone_number, username, is_premium, county_code, in_live_task=false}) {
+  const lastName = last_name ? last_name : "<i class='text-danger bi x-square'></i>";
+  const usernameHTML = username ? `<a href="https://t.me/${username}">@${username}</a>` : "<i class='text-danger bi x-square'></i>";
+  const isPremiumHTML = is_premium ? "<i class='text-success bi check-square'></i>" : "<i class='text-danger bi x-square'></i>";
+  const isUsing = in_live_task ? "<i class='text-success bi check-square'></i>" : "<i class='text-danger bi x-square'></i>";
+
+  const $tr = $(`
+    <tr>
+      <td><input class='form-check-input current accounts' type='checkbox' onclick="onInputChange()" id='${user_id}'></td>
+      <td>${user_id}</td>
+      <td>${first_name}</td>
+      <td>${lastName}</td>
+      <td>+${phone_number} <span class="fi fi-${county_code}"></span></td>
+      <td>${usernameHTML}</td>
+      <td>${isPremiumHTML}</td>
+      <td>${isUsing}</td>
+      <td><a class='text-primary me-3' href='/accounts/${user_id}'><i class='bi pencil'></i></a><a class='text-danger' style='cursor: pointer' onclick="askDeleteAccounts(${user_id})"><i class='bi trash'></i></a></td>
+    </tr>
+  `);
+
+  const existingElement = $(`#accountsTable #${user_id}`);
+  if (existingElement.length) {
+    existingElement.closest('tr').replaceWith($tr);
+  } else {
+    let $accountCounts = $('accounts-count')
+    $accountCounts.text(1 + parseInt($accountCounts.text()))
+    $("#accountsTable").append($tr);
+  }
+
+}
+
+    $('#all').change(onInputChange)
+
+</script>

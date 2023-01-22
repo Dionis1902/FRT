@@ -1,0 +1,45 @@
+<div class="modal fade" id="askDeleteAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Account deleting</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input type="hidden" id="deleteIds" value="">
+                    Are you sure you want to do this?
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi-x-lg"></i> Close</button>
+                <button type="button" class="btn btn-primary" onclick="deleteAccounts()"><i class="bi-trash3"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let askDeleteAccountModal = new bootstrap.Modal('#askDeleteAccountModal', {})
+
+    function askDeleteAccounts(id) {
+        if (!id)
+            id = getIds()
+        if (id.length === 0)
+            return
+        $('#deleteIds').val(id)
+        askDeleteAccountModal.show()
+    }
+
+
+    function deleteAccounts() {
+        let ids = $('#deleteIds').val()
+        if (ids.length === 0)
+            return
+        $.ajax({
+            url: "/api/accounts/?tab_id=" + tabID + "&ids=" + ids,
+            type: 'DELETE'
+        });
+        askDeleteAccountModal.hide()
+    }
+
+</script>
