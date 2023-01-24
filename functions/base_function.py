@@ -76,6 +76,7 @@ class Base:
         except Exception as e:
             self._logger.exception(e)
             await database.execute(tasks.update().values(status=Status.ERROR.value).where(tasks.c.id == self._task_id))
+        self._websocket_handler.clear()
 
     async def save_task(self):
         self._task_id = await database.execute(tasks.insert().values(name=self.__function_name__))
@@ -111,7 +112,7 @@ class Base:
         if not os.path.isdir(path):
             os.makedirs(path, exist_ok=True)
 
-        file_handler = logging.FileHandler(os.path.join(path, f'task_{self._task_id}.log'))
+        file_handler = logging.FileHandler(os.path.join(path, f'task_{self._task_id}.log'), encoding='utf-8')
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         self._logger.addHandler(file_handler)
@@ -127,7 +128,8 @@ class Base:
     @staticmethod
     async def stop(task_id):
         task = Base._TASKS.get(task_id)
-        if task:
+        if task and not task.done() and not task.cancelled():
+            WebsocketHandler(task_id).clear()
             task.cancel()
             await database.execute(tasks.update().values(status=Status.STOPPED.value).where(tasks.c.id == task_id and tasks.c.status == Status.PROGRESS.value))
             return True
@@ -150,7 +152,7 @@ class Base:
                     return False
             except Exception as e:
                 print(e, type(e), e.__dict__)
-                self._logger.error(f'Some errors, details "{e.__doc__}"')
+                self._logger.error(f'Some troubles, details "{e.__doc__}"')
             return True
 
         return wrapper

@@ -34,7 +34,7 @@ async def get_tasks(task_id: int):
     log_file = os.path.join(os.getcwd(), 'data', 'logs', f'task_{task_id}.log')
     if os.path.isfile(log_file):
         try:
-            async with aiofiles.open(log_file, 'r', encoding='windows-1251') as f:
+            async with aiofiles.open(log_file, 'r', encoding='utf-8') as f:
                 return Response(content=await f.read(), media_type='text/plain')
         except (Exception, ):
             pass

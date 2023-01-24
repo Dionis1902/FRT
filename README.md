@@ -32,6 +32,7 @@
 ### Features
 - Web interface (Dark and light theme, WOOOW)
 - Ability to import an account using all popular methods
+- Ability to select random or specific accounts to perform the function
 - Ability to export account as TData
 - Convenient account setting (Basic data and profile photo)
 - Possibility to get a code from a telegram on the site
@@ -146,6 +147,13 @@ $ uvicorn main:app --host 0.0.0.0 --port 8080
 ```
 
 ## Screenshots
+<details><summary>Screenshots of pages</summary>
+  <img src="/images/accounts.png" />
+  <img src="/images/functions.png" />
+  <img src="/images/tasks.png" />
+  <img src="/images/task.png" />
+  <img src="/images/settings.png" />
+</details>
 
 ## Coming soon
 - Live functions (For example, to automatically write comments under new posts)

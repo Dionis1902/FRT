@@ -1,6 +1,6 @@
 import random
 
-from pyrogram.errors import UsernameNotOccupied, UsernameInvalid
+from pyrogram.errors import UsernameNotOccupied, UsernameInvalid, UserPrivacyRestricted, UserNotMutualContact, UserIsBlocked
 
 from functions.base_function import Base
 from functions.utils import Field, Types
@@ -42,6 +42,9 @@ class Function(Base):
             message = random.choice(self._messages)
             await client.send_message(username, message)
             self._logger.info(f'Success send message to @{username}, message "{message}"', extra=dict(user_id=account.user_id))
+        except (UserPrivacyRestricted, UserNotMutualContact, UserIsBlocked) as e:
+            self._logger.error(f'Some troubles with user @{username}, details "{e.__doc__}"')
+            self._skip.append(user)
         except (UsernameNotOccupied, UsernameInvalid):
             self._logger.error(f'The username @{username} is not occupied by anyone')
             self._skip.append(user)

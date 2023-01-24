@@ -25,7 +25,7 @@ class WebsocketHandler(StreamHandler):
     async def _innit_logs(self, manager, task_id):
         log_file = os.path.join(os.getcwd(), 'data', 'logs', f'task_{task_id}.log')
         if not self and os.path.isfile(log_file):
-            async with aiofiles.open(log_file, 'r', encoding='windows-1251') as f:
+            async with aiofiles.open(log_file, 'r', encoding='utf8') as f:
                 await manager.send_data(logging_message=await f.readlines())
             return
         elif not self:
