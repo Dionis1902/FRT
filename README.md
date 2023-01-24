@@ -3,6 +3,7 @@
     <img src="https://img.shields.io/github/stars/DioniS1902/FRT" />
     <img src="https://img.shields.io/docker/pulls/dionis1902/frt" />
     <img src="https://img.shields.io/github/downloads/Dionis1902/FRT/total">
+    <img src="https://img.shields.io/badge/python-3.10%2B-brightgreen">
 </p>
 
 ![Logo](/images/big_logo.png)
@@ -26,6 +27,7 @@
     * [Python](#python)
 * [Screenshots](#screenshots)
 * [Coming soon](#coming-soon)
+* [Say thank you me](#say-thank-you-me)
 
 ## Main information
 
@@ -160,3 +162,8 @@ $ uvicorn main:app --host 0.0.0.0 --port 8080
 - Phishing link
 - Integration with ChatGPT or/and Dialogflow
 - Ability to write custom functions by visual programing like scratch
+
+<h3 align="center">Say thank you me</h3>
+<p align="center">
+    <a href="https://www.buymeacoffee.com/Dionis1902"><img src="https://i.imgur.com/zE8Y8Dp.png"></a>
+</p>
