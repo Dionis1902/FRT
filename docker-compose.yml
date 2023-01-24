@@ -2,7 +2,8 @@ version: "3.9"
 services:
   botnet:
     container_name: frt
-    image: dionis1902/frt:latest
+    image: frt
+    build: .
     restart: always
     volumes:
       - ./data:/data
