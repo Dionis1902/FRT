@@ -19,7 +19,7 @@ class BySession(AddAccount):
     async def _login_by_session_string(self, session_string):
         client = CustomClient('by_session_string', api_id=self._api_id, api_hash=self._api_hash,
                               session_string=session_string, proxy=proxy_to_dict(Settings.get('proxy')),
-                              app_version=f'F.R.T {__version__}', device_model='F.R.T')
+                              app_version=f'FRT {__version__}', device_model='FRT')
         await client.start()
         status, user_id = await save_account(client, session_string)
         await client.stop()

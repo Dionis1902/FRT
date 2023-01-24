@@ -131,7 +131,7 @@ class ByQrCode(AddAccount):
         await self._manager.broadcast(lock_buttons=True)
         await self._manager.alert('Wait to qr code')
         self._client = Client('by_qr_code', api_id=self._api_id, api_hash=self._api_hash, proxy=proxy_to_dict(Settings.get('proxy')),
-                              in_memory=True, app_version=f'F.R.T {__version__}', device_model='F.R.T')
+                              in_memory=True, app_version=f'FRT {__version__}', device_model='FRT')
         await self._client.connect()
         self._nearest = await self._client.invoke(raw.functions.help.GetNearestDc())
 

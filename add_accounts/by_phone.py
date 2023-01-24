@@ -79,7 +79,7 @@ class ByPhone(AddAccount):
             return
 
         self._client = CustomClient('by_phone', api_id=self._api_id, api_hash=self._api_hash,
-                                    in_memory=True, proxy=proxy_to_dict(Settings.get('proxy')), app_version=f'F.R.T {__version__}', device_model='F.R.T')
+                                    in_memory=True, proxy=proxy_to_dict(Settings.get('proxy')), app_version=f'FRT {__version__}', device_model='FRT')
         self._phone_number = phone_number
 
         try:
