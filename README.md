@@ -163,7 +163,7 @@ $ uvicorn main:app --host 0.0.0.0 --port 8080
 - Integration with ChatGPT or/and Dialogflow
 - Ability to write custom functions by visual programing like scratch
 
-<h3 align="center">Say thank you me</h3>
+## Say thank you me
 <p align="center">
     <a href="https://www.buymeacoffee.com/Dionis1902"><img src="https://i.imgur.com/zE8Y8Dp.png"></a>
 </p>
