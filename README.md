@@ -73,7 +73,7 @@ Password: roottoor
 - [Suggest a function](https://github.com/Dionis1902/FRT/issues/new?assignees=&labels=function&template=new-function.md&title=%5BFUNCTION%5D)
 
 ## How run
-
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/YGdHQR?referralCode=cTSsKD)
 ### Docker compose
 - Install docker and docker-compose
 - Create file docker-compose.yml
@@ -93,7 +93,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      POSTGRES_URL: postgresql://root:secret_password@postgres/data
+      DATABASE_URL: postgresql://root:secret_password@postgres/data
 
   postgres:
     container_name: postgres_container
@@ -135,11 +135,11 @@ $ python -m venv env
 
 ### Linux 
 $ source env/bin/activate
-$ export POSTGRES_URL=postgresql://root:secret_password@127.0.0.1/data
+$ export DATABASE_URL=postgresql://root:secret_password@127.0.0.1/data
 
 ### Windows
 $ .\env\Scripts\activate
-$ set POSTGRES_URL=postgresql://root:secret_password@127.0.0.1/data 
+$ set DATABASE_URL=postgresql://root:secret_password@127.0.0.1/data 
 
 $ pip install -r requirements.txt
 
