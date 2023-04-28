@@ -88,7 +88,7 @@ services:
     volumes:
       - ./data:/data
     ports:
-      - '8080:8080' # any_port_you_like:8080
+      - '8080:80' # any_port_you_like:8080
     depends_on:
       postgres:
         condition: service_healthy
