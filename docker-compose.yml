@@ -13,7 +13,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      POSTGRES_URL: postgresql://root:secret_password@postgres/data
+      DATABASE_URL: postgresql://root:secret_password@postgres/data
 
   postgres:
     container_name: postgres_container
